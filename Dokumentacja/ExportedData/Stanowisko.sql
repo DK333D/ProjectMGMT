@@ -1,0 +1,15 @@
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Manager', 'Responsible for overseeing operations');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Developer', 'Responsible for software development');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Analyst', 'Responsible for analyzing data');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Designer', 'Responsible for creating designs');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Administrator', 'Responsible for system administration');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Engineer', 'Responsible for designing and building systems');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Supervisor', 'Responsible for supervising teams');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Consultant', 'Responsible for providing expertise');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Tester', 'Responsible for software testing');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Support', 'Responsible for providing user support');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('Brak', 'Brak obecnie przypisanego stanowiska');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('C', 'C');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('a', 'as');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('aa', 'asa');
+INSERT INTO public."Stanowisko" ("Nazwa", "Opis") VALUES ('aaa3', 'as');

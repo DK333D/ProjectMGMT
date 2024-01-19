@@ -1,0 +1,10 @@
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('Manager', 'Zarządza zespołem');
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('Developer ', 'Pisze kod');
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('a', 'v');
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('v', 'v');
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('s', 's');
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('b', 'b');
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('bbb', 'b');
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('bbba', 'b');
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('aaa3', 'as');
+INSERT INTO public."Rola" ("Nazwa", "Opis") VALUES ('tt', 'tt');

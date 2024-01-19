@@ -1,0 +1,15 @@
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('Atlas', 'Aplikacja do obsługi map ', '2023-01-01', '2023-12-31');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('Belgrad visitor', 'Aplikacja wycieczkowa dla turystów Belgradu', '2023-02-15', '2023-11-30');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('Krakowskie powierze', 'Program do kontroli i monitoringu stanu powierza w Krakowie', '2023-03-10', '2023-10-20');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('Dictionairly', 'Program integrujący wszystkie słowniki', '2023-04-20', '2023-09-15');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('Ethernetium Wallet', 'Applikacja zapewniająca bezpieczeństwo przechowywanych środków kryptowalutowych', '2023-05-05', '2023-08-25');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('Test', 'Test', '2023-11-23', '2023-12-02');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('bbbb', 'bbbb', '2024-01-18', '2024-02-09');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('aaaa', 'aaaa', '2024-01-04', '2024-01-05');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('ttt', 't', '2023-11-30', '2023-11-30');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('sss', 'sa', '2023-12-20', '2024-01-04');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('aaaaaa', 'aa', '2024-01-18', '2024-02-01');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('CCCC', 'a', '2024-02-01', '2024-02-09');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('vvv', 'vv', '2024-01-11', '2024-02-09');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('aaac', 'aaa', '2024-01-04', '2024-02-09');
+INSERT INTO public."Projekt" ("Nazwa", "Opis", "Start_Data", "Koniec_Data") VALUES ('Kremowe ciastka', '1237', '2024-01-01', '2024-02-11');
