@@ -1,4 +1,5 @@
-# uwaga plik zawiera login i hasło do bazy!!!
+# Uzupełnij dane użytkownika do bazy danych
+
 
 import sqlite3
 from sqlite3 import Error
@@ -71,11 +72,11 @@ def create_connection_sqlite(path):
 
 # Establish an async PostgreSQL connection
 async def create_async_connection():
-    dbname = 'hwhivgyo'
-    user = 'hwhivgyo'
-    password = '8qjg6rB4sxUr5xHS8Z6N2xGFDm-XGmEx'
-    host = 'surus.db.elephantsql.com'
-    port = '5432'
+    dbname = ''
+    user = ''
+    password = ''
+    host = ''
+    port = ''
     # Replace with your actual PostgreSQL database credentials
     conn = await asyncpg.connect(
         user=user,
@@ -87,11 +88,11 @@ async def create_async_connection():
 
 
 def create_connection():
-    dbname = 'hwhivgyo'
-    user = 'hwhivgyo'
-    password = '8qjg6rB4sxUr5xHS8Z6N2xGFDm-XGmEx'
-    host = 'surus.db.elephantsql.com'
-    port = '5432'
+    dbname = ''
+    user = ''
+    password = ''
+    host = ''
+    port = ''
 
     connection = psycopg2.connect(
         dbname=dbname,
