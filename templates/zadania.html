@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista zadań</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+<div>
+
+    {% include 'menu.html' %}
+    <h1>Lista zadań</h1>
+    <table>
+        <tr>
+            <th>Tytuł</th>
+            <th>Opis</th>
+            <th>Utworzenie_Data</th>
+            <th>Koniec_Data</th>
+            <th>Priorytet</th>
+            <th>Zadanie_Punkty</th>
+            <th>Tablica_Nazwa</th>
+        </tr>
+        {% for zadanie in result %}
+        <tr>
+            <td>{{ zadanie[1] }}</td>
+            <td>{{ zadanie[2] }}</td>
+            <td>{{ zadanie[3] }}</td>
+            <td>{{ zadanie[4] }}</td>
+            <td>{{ zadanie[5] }}</td>
+            <td>{{ zadanie[6] }}</td>
+            <td>{{ zadanie[7] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{zadanie[0]}}">Usuń</button>
+            </td>
+
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <h1>Dodaj zadanie</h1>
+    <form id="myForm">
+        <label for="Tytul">Tytuł:</label><br>
+        <input type="text" id="Tytul" name="Tytul" required><br>
+
+        <label for="Opis">Opis zadania:</label><br>
+        <textarea id="Opis" name="Opis"></textarea><br>
+
+        <label for="Utworzenie_Data">Utworzenie_Data (YYYY-MM-DD):</label><br>
+        <input type="date" id="Utworzenie_Data" name="Utworzenie_Data" value="2023-12-31"><br>
+
+        <label for="Koniec_Data">Koniec_Data (YYYY-MM-DD):</label><br>
+        <input type="date" id="Koniec_Data" name="Koniec_Data" value="2023-12-31"><br>
+
+        <label for="Priorytet">Priorytet:</label><br>
+        <input type="number" id="Priorytet" name="Priorytet"><br>
+
+        <label for="Zadanie_Punkty">Zadanie_Punkty:</label><br>
+        <input type="number" id="Zadanie_Punkty" name="Zadanie_Punkty"><br>
+
+        Wybierz tablicę:
+        <div id="Tablica_ID">
+        </div>
+        <input type="submit" value="Dodaj zadanie">
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const Tablica_ID = document.getElementById('Tablica_ID');
+
+            function createProjectRadio(tablica) {
+                const radioInput = document.createElement('input');
+                radioInput.type = 'radio';
+                radioInput.id = `tablica_${tablica[0]}`;
+                radioInput.name = 'Tablica_ID';
+                radioInput.value = tablica[0];
+                radioInput.required = true;
+
+                const label = document.createElement('label');
+                label.htmlFor = `tablica_${tablica[0]}`;
+                label.textContent = tablica[1] + '-' + tablica[2];
+
+                const lineBreak = document.createElement('br');
+
+                Tablica_ID.appendChild(radioInput);
+                Tablica_ID.appendChild(label);
+                Tablica_ID.appendChild(lineBreak);
+            }
+
+            function fetchTabliceData() {
+                return new Promise(function (resolve, reject) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                const tablice = JSON.parse(xhr.responseText);
+                                resolve(tablice);
+                            } else {
+                                reject('Failed to fetch tablice: ' + xhr.status);
+                            }
+                        }
+                    };
+
+                    xhr.open('GET', '/pobierz_tablice', true);
+                    xhr.send();
+                });
+            }
+
+            fetchTabliceData()
+                .then(function (tablice) {
+                    tablice.forEach(function (tablica) {
+                        createProjectRadio(tablica);
+                    });
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+
+
+            document.getElementById('myForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const utworzenie_data = document.getElementById('Utworzenie_Data').value;
+                const koniec_data = document.getElementById('Koniec_Data').value;
+
+                const selectedDate1 = new Date(utworzenie_data);
+                const selectedDate2 = new Date(koniec_data);
+
+                const formattedDate1 = selectedDate1.toISOString().split('T')[0];
+                const formattedDate2 = selectedDate2.toISOString().split('T')[0];
+
+                this.setAttribute('Utworzenie_Data', formattedDate1);
+                this.setAttribute('Koniec_Data', formattedDate2);
+                const formData = new FormData(this);
+
+                fetch('/dodaj_zadanie', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw Error('Problem z połączeniem z serwerem');
+                        }
+                        return response;
+                    })
+                    .then(data => {
+                        // console.log('Server response:', data);
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+
+            const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    var confirmation = confirm("Czy na pewno chcesz usunąć to zadanie razem z powiązanymi danymi z tabel: Zadania_Relacja? Dane zostaną usunięte kaskadowo.");
+
+                    if (confirmation) {
+                        const id = button.getAttribute('data-hidden-id');
+
+                        fetch(`/usun_zadanie/${id}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw Error('Problem z połączeniem z serwerem');
+                                }
+                                return response;
+                            })
+                            .then(() => {
+                                window.location.reload();
+                            })
+                            .catch(error => {
+                                console.error('JavaScript. Error:', error);
+                            });
+                    }
+                });
+
+            });
+        });
+
+    </script>
+
+</div>
+</body>
+</html>

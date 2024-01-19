@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <h1>Lista projektów zakończonych</h1>
+    <table>
+        <tr>
+            <th>Nazwa</th>
+            <th>Opis</th>
+            <th>Data rozpoczęcia</th>
+            <th>Data zakończenia</th>
+        </tr>
+        {% for project in result %}
+        <tr>
+            <td>{{ project[1] }}</td>
+            <td>{{ project[2] }}</td>
+            <td>{{ project[3] }}</td>
+            <td>{{ project[4] }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+</div>
+</body>
+</html>

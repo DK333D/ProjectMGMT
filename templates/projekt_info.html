@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Projekt</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+
+</head>
+<body>
+{% include 'menu.html' %}
+<div>
+    <h1>Projekt</h1>
+    <table>
+        <tr>
+            <th>Nazwa</th>
+            <th>Opis</th>
+            <th>Data rozpoczęcia</th>
+            <th>Data zakończenia</th>
+            <th>Akcje</th>
+        </tr>
+        {% for projekt in result %}
+        <tr>
+            <td>{{ projekt[1] }}</td>
+            <td>{{ projekt[2] }}</td>
+            <td>{{ projekt[3] }}</td>
+            <td>{{ projekt[4] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{projekt[0]}}"> Usuń</button>
+            </td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <div>Ten projekt ma <span id="liczba_tablic"></span> tablic: {{ result[0][5] }}</div>
+    <div>Ten projekt ma <span id="liczba_zadan"></span> zadań: {{ result[0][6] }}</div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    var confirmation = confirm("Czy na pewno chcesz usunąć ten projekt razem z powiązanymi danymi z tabeli: Tablica, Zadanie, Zadania_Relacja, Projekt_Osoba_Rola? Dane zostaną usunięte kaskadowo.");
+
+                    if (confirmation) {
+                        const id = button.getAttribute('data-hidden-id');
+
+                        fetch(`/usun_projekt/${id}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw Error('Problem z połączeniem z serwerem');
+                                }
+                                return response;
+                            })
+                            .then(() => {
+                                // window.location.reload();
+                                window.location.href = '/projekty';
+
+                            })
+                            .catch(error => {
+                                console.error('JavaScript. Error:', error);
+                            });
+                    }
+
+                });
+            });
+
+
+
+        });
+
+
+    </script>
+</div>
+</body>
+</html>

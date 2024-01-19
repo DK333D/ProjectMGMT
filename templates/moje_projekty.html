@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista projektów</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+{% include 'menu.html' %}
+<div>
+    <h1>Lista projektów</h1>
+    <table>
+        <tr>
+            <th>Projekt Nazwa</th>
+            <th>Projekt Opis</th>
+            <th>Data rozpoczęcia</th>
+            <th>Data zakończenia</th>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th>Email</th>
+            <th>Rola Nazwa</th>
+            <th>Rola Opis</th>
+            <th>Akcje</th>
+        </tr>
+        {% for projekt in result %}
+        <tr>
+            <td><a href="/projekt_info/{{projekt[0]}}">{{ projekt[3] }}</a></td>
+            <td>{{ projekt[4] }}</td>
+            <td>{{ projekt[5] }}</td>
+            <td>{{ projekt[6] }}</td>
+            <td>{{ projekt[7] }}</td>
+            <td>{{ projekt[8] }}</td>
+            <td>{{ projekt[9] }}</td>
+            <td>{{ projekt[10] }}</td>
+            <td>{{ projekt[11] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{projekt[0]}}"> Usuń</button>
+            </td>
+
+        </tr>
+        {% endfor %}
+
+    </table>
+
+
+    <h1>Dodaj mój projekt</h1>
+    <form id="myForm">
+        <label for="Nazwa">Nazwa projektu:</label><br>
+        <input type="text" id="Nazwa" name="Nazwa" required><br>
+
+        <label for="Opis">Opis projektu:</label><br>
+        <textarea id="Opis" name="Opis"></textarea><br>
+
+        <label for="Start_Data">Data rozpoczęcia:</label><br>
+        <input type="date" id="Start_Data" name="Start_Data" required><br>
+
+        <label for="Koniec_Data">Data zakończenia:</label><br>
+        <input type="date" id="Koniec_Data" name="Koniec_Data" required><br><br>
+
+        <label for="Rola_ID">Wybierz rolę</label><br>
+        <div id="Rola_ID">
+        </div>
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const Rola_ID = document.getElementById('Rola_ID');
+
+
+            // Funkcja do wypisania listy stanowisk
+            function createRolaRadio(rola) {
+                const radioInput = document.createElement('input');
+                radioInput.type = 'radio';
+                radioInput.id = `rola_${rola[0]}`;
+                radioInput.name = 'Rola_ID';
+                radioInput.value = rola[0];
+                radioInput.required = true;
+
+                const label = document.createElement('label');
+                label.htmlFor = `rola_${rola[0]}`;
+                label.textContent = rola[1];
+
+                const lineBreak = document.createElement('br');
+
+                Rola_ID.appendChild(radioInput);
+                Rola_ID.appendChild(label);
+                Rola_ID.appendChild(lineBreak);
+
+            }
+
+            function fetchRoleData() {
+                return new Promise(function (resolve, reject) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                const roles = JSON.parse(xhr.response);
+                                resolve(roles);
+                            } else {
+                                reject(xhr.status);
+                            }
+                        }
+                    };
+
+                    xhr.open('GET', '/pobierz_role', true);
+                    xhr.send();
+                });
+            }
+
+            fetchRoleData()
+                .then(function (roles) {
+                    roles.forEach(function (rola) {
+                        createRolaRadio(rola);
+                    });
+                })
+                .catch(function (error) {
+                    console.error('Failed to fetch roles:', error);
+                });
+
+            document.getElementById('myForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                fetch('/dodaj_moj_projekt', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw Error('Problem z połączeniem z serwerem');
+                        }
+                        return response;
+                    })
+                    .then(data => {
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+
+            });
+
+            const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    var confirmation = confirm("Czy na pewno chcesz usunąć ten projekt razem z powiązanymi danymi z tabeli: Tablica, Zadanie, Zadania_Relacja, Projekt_Osoba_Rola? Dane zostaną usunięte kaskadowo.");
+
+                    if (confirmation) {
+                        const id = button.getAttribute('data-hidden-id');
+
+                        fetch(`/usun_projekt/${id}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw Error('Problem z połączeniem z serwerem');
+                                }
+                                return response;
+                            })
+                            .then(() => {
+                                window.location.reload();
+                            })
+                            .catch(error => {
+                                console.error('JavaScript. Error:', error);
+                            });
+                    }
+
+                });
+            });
+
+
+        });
+
+
+    </script>
+</div>
+</body>
+</html>

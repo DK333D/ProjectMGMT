@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista tablic</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+
+
+<div>
+
+
+    {% include 'menu.html' %}
+
+    <h3>Tablice bez zadan</h3>
+    <div id="tablice_z_0_zadaniami"></div>
+    <h3>Tablice z zadaniami</h3>
+    <div id="tablice_z_min_1_zadaniem"></div>
+    <h3>Tablice z sumą punktów mniejszą niż 100</h3>
+    <div id="tablice_z_suma_punktow_mniejsza_niz_100"></div>
+    <h3>Tablice z sumą punktów co najmniej 100</h3>
+    <div id="tablice_z_liczba_punktow_minimum_100"></div>
+
+
+    <h1>Lista tablic</h1>
+    <table>
+        <tr>
+            <th>Nazwa</th>
+            <th>Opis</th>
+            <th>Projekt</th>
+        </tr>
+        {% for tablica in result %}
+        <tr>
+            <td>{{ tablica[1] }}</td>
+            <td>{{ tablica[2] }}</td>
+            <td>{{ tablica[3] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{tablica[0]}}"> Usuń</button>
+            </td>
+
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <h1>Dodaj tablica</h1>
+    <form id="myForm">
+        <label for="Nazwa">Nazwa tablicy:</label><br>
+        <input type="text" id="Nazwa" name="Nazwa" minlength="3" required><br>
+
+        <label for="Opis">Opis tablicy:</label><br>
+        <textarea id="Opis" name="Opis"></textarea><br>
+
+        <!--        <button type="button" id="wybierzProjekty">Wybierz projekt</button>-->
+        <label for="Projekt_ID">Wybierz projekt</label>
+        <div id="Projekt_ID">
+            <!-- Radio buttons will be dynamically added here -->
+        </div>
+        <input type="submit" value="Dodaj tablicę">
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const Projekt_ID = document.getElementById('Projekt_ID');
+            const tablice_z_0_zadaniami = document.getElementById('tablice_z_0_zadaniami');
+            const tablice_z_min_1_zadaniem = document.getElementById('tablice_z_min_1_zadaniem');
+            const tablice_z_suma_punktow_mniejsza_niz_100 = document.getElementById('tablice_z_suma_punktow_mniejsza_niz_100');
+            const tablice_z_liczba_punktow_minimum_100 = document.getElementById('tablice_z_liczba_punktow_minimum_100');
+
+            function createTablica_ul(tablice, div) {
+                const ulElement = document.createElement('ul');
+                div.appendChild(ulElement);
+                tablice.forEach(t => {
+                    const liElement = document.createElement('li');
+                    liElement.innerHTML = '<a href="/projekt_info/' + t[0] + '">' + t[1] + '</a>';
+                    ulElement.appendChild(liElement);
+                });
+
+            }
+
+            function makeRequest(method, url) {
+                return new Promise(function (resolve, reject) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                resolve(JSON.parse(xhr.response));
+                            } else {
+                                reject(xhr.status);
+                            }
+                            xhr.onreadystatechange = null;
+                        }
+                    };
+                    xhr.open(method, url, true);
+                    xhr.send();
+                });
+            }
+
+            const requestPromises = [
+                makeRequest('GET', '/tablice_z_0_zadaniami'),
+                makeRequest('GET', '/tablice_z_min_1_zadaniem'),
+                makeRequest('GET', '/tablice_z_suma_punktow_mniejsza_niz_100'),
+                makeRequest('GET', '/tablice_z_liczba_punktow_minimum_100')
+            ];
+
+            Promise.all(requestPromises)
+                .then(function (responses) {
+                    // Responses contains an array with the resolved data from all requests
+                    createTablica_ul(responses[0], tablice_z_0_zadaniami);
+                    createTablica_ul(responses[1], tablice_z_min_1_zadaniem);
+                    createTablica_ul(responses[2], tablice_z_suma_punktow_mniejsza_niz_100);
+                    createTablica_ul(responses[3], tablice_z_liczba_punktow_minimum_100);
+                })
+                .catch(function (error) {
+                    console.error('Failed to fetch data:', error);
+                });
+
+
+            //--------------------------
+
+            // Function to create radio buttons for projects
+            function createProjectRadio(project) {
+                const radioInput = document.createElement('input');
+                radioInput.type = 'radio';
+                radioInput.id = `project_${project[0]}`;
+                radioInput.name = 'Projekt_ID';
+                radioInput.value = project[0];
+                radioInput.required = true;
+
+                const label = document.createElement('label');
+                label.htmlFor = `project_${project[0]}`;
+                label.textContent = project[1];
+
+                const lineBreak = document.createElement('br');
+
+                Projekt_ID.appendChild(radioInput);
+                Projekt_ID.appendChild(label);
+                Projekt_ID.appendChild(lineBreak);
+            }
+
+            // const xhr = new XMLHttpRequest();
+            // xhr.onreadystatechange = function () {
+            //     if (xhr.readyState === XMLHttpRequest.DONE) {
+            //         if (xhr.status === 200) {
+            //             // console.log(xhr.responseText);
+            //             const projects = JSON.parse(xhr.responseText);
+            //             projects.forEach(function (project) {
+            //                 createProjectRadio(project);
+            //             });
+            //         } else {
+            //             console.error('Failed to fetch projects:', xhr.status);
+            //         }
+            //     }
+            // };
+
+
+            // xhr.open('GET', '/pobierz_projekty', true);
+            // xhr.send();
+
+            function fetchData() {
+                return new Promise(function (resolve, reject) {
+                    function makeRequest() {
+                        const xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === XMLHttpRequest.DONE) {
+                                if (xhr.status === 200) {
+                                    const projects = JSON.parse(xhr.responseText);
+                                    resolve(projects); // Resolve the promise with fetched data
+                                } else {
+                                    reject(xhr.status); // Reject the promise with the status code
+                                }
+                            }
+                        };
+                        xhr.open('GET', '/pobierz_projekty', true);
+                        xhr.send();
+                    }
+
+                    function attemptRequest(attemptsLeft) {
+                        makeRequest();
+                        if (attemptsLeft <= 0) {
+                            reject('Maximum attempts reached'); // Reject if maximum attempts reached
+                        } else {
+                            setTimeout(function () {
+                                attemptRequest(attemptsLeft - 1); // Retry with fewer attempts
+                            }, 1000); // Wait for 1 second before retrying
+                        }
+                    }
+
+                    const maxAttempts = 5; // Set the maximum number of attempts
+                    attemptRequest(maxAttempts);
+                });
+            }
+
+            // Usage example
+            fetchData()
+                .then(function (projects) {
+                    projects.forEach(function (project) {
+                        createProjectRadio(project);
+                    });
+                })
+                .catch(function (error) {
+                    console.error('Failed to fetch projects:', error);
+                });
+
+            document.getElementById('myForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                // console.log(formData);
+                // return;
+                fetch('/dodaj_tablica', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw Error('Problem z połączeniem z serwerem');
+                        }
+                        return response;
+                    })
+                    .then(data => {
+                        // console.log('Server response:', data);
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+
+            const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    var confirmation = confirm("Czy na pewno chcesz usunąć ten projekt razem z powiązanymi danymi z tabeli: Zadanie, Zadania_Relacja? Dane zostaną usunięte kaskadowo.");
+
+                    if (confirmation) {
+                        const id = button.getAttribute('data-hidden-id');
+                        // console.log(id);
+
+                        fetch(`/usun_tablica/${id}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw Error('Problem z połączeniem z serwerem');
+                                }
+                                return response;
+                            })
+                            .then(() => {
+                                window.location.reload();
+                            })
+                            .catch(error => {
+                                console.error('JavaScript. Error:', error);
+                            });
+                    }
+                });
+            });
+        });
+
+    </script>
+
+</div>
+</body>
+</html>

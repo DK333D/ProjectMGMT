@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista ról</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+<div>
+
+    {% include 'menu.html' %}
+    <h1>Lista ról</h1>
+    <table>
+        <tr>
+            <th>Nazwa</th>
+            <th>Opis</th>
+        </tr>
+        {% for rola in result %}
+        <tr>
+            <td>{{ rola[1] }}</td>
+            <td>{{ rola[2] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{rola[0]}}"> Usuń</button>
+            </td>
+
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <h1>Dodaj rola</h1>
+    <form id="myForm">
+        <label for="Nazwa">Nazwa roli:</label><br>
+        <input type="text" id="Nazwa" name="Nazwa" required><br>
+
+        <label for="Opis">Opis roli:</label><br>
+        <textarea id="Opis" name="Opis"></textarea><br>
+
+        <input type="submit" value="Submit">
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('myForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                fetch('/dodaj_rola', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw Error('Problem z połączeniem z serwerem');
+                        }
+                        return response;
+                    })
+                    .then(data => {
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+
+            const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    let alert_msg="Uwaga! Rola nie zostanie usunięta, jeśli jest używana w min. 1 projekcie!";
+                    alert(alert_msg);
+                    const id = button.getAttribute('data-hidden-id');
+
+                    fetch(`/usun_rola/${id}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw Error('Problem z połączeniem z serwerem');
+                            }
+                            return response;
+                        })
+                        .then(() => {
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('JavaScript. Error:', error);
+                        });
+                });
+            });
+        });
+
+    </script>
+
+</div>
+</body>
+</html>

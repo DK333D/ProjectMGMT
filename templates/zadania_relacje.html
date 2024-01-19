@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista relacji między zadaniami</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+<div>
+    {% include 'menu.html' %}
+
+    <h1>Lista relacji między zadaniami</h1>
+    <table>
+        <tr>
+            <th>Zadanie 1</th>
+            <th>Zadanie 2</th>
+            <th>Relacja typ</th>
+        </tr>
+        {% for relacja in result %}
+        <tr>
+            <td>{{ relacja[1] }}</td>
+            <td>{{ relacja[2] }}</td>
+            <td>{{ relacja[3] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{relacja[0]}}"> Usuń</button>
+            </td>
+
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <h1>Dodaj relacja</h1>
+    <form id="myForm">
+        <div style="display: flex;">
+            <label for="Zadanie_1_ID">Wybierz Zadanie 1</label>
+            <div id="Zadanie_1_ID">
+                <!-- Radio buttons will be dynamically added here -->
+            </div>
+            <label for="Zadanie_2_ID">Wybierz Zadanie2</label>
+            <div id="Zadanie_2_ID">
+                <!-- Radio buttons will be dynamically added here -->
+            </div>
+            <label for="Relacja_Typ_ID">Wybierz Typ Relacji</label>
+            <div id="Relacja_Typ_ID">
+                <!-- Radio buttons will be dynamically added here -->
+            </div>
+        </div>
+        <input type="submit" value="Dodaj relację">
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+                const Zadanie_1_ID = document.getElementById('Zadanie_1_ID');
+                const Zadanie_2_ID = document.getElementById('Zadanie_2_ID');
+                const Relacja_Typ_ID = document.getElementById('Relacja_Typ_ID');
+
+                // Function to create radio buttons for zadania
+                function createRadio(data, div, id_text) {
+                    const radioInput = document.createElement('input');
+                    radioInput.type = 'radio';
+                    radioInput.id = id_text + `_${data[0]}`;
+                    radioInput.name = div.id;
+                    radioInput.value = data[0];
+                    radioInput.required = true;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = id_text + `_${data[0]}`;
+                    label.textContent = data[1];
+
+                    const lineBreak = document.createElement('br');
+
+                    div.appendChild(radioInput);
+                    div.appendChild(label);
+                    div.appendChild(lineBreak);
+                }
+
+
+                // Function to handle the response and create zadania_relacja radio elements
+                function fillRadioDiv(responseText, div, id_text) {
+                    responseText.forEach(function (zadanie, id_text) {
+                        createRadio(zadanie, div, id_text);
+                    });
+                }
+
+
+                function makeRequest(method, url, div) {
+                    return new Promise(function (resolve, reject) {
+
+                        const xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === XMLHttpRequest.DONE) {
+                                if (xhr.status === 200) {
+                                    resolve(xhr.responseText);
+                                } else {
+                                    reject(xhr.status);
+                                }
+                            }
+
+                        };
+                        xhr.open(method, url, true);
+                        xhr.send();
+                    });
+                }
+
+
+                Promise.all([
+                    makeRequest('GET', '/pobierz_zadania', Zadanie_1_ID),
+                    makeRequest('GET', '/pobierz_zadania', Zadanie_2_ID)
+                ])
+                    .then(function (responses) {
+                        const response1 = JSON.parse(responses[0]);
+                        const response2 = JSON.parse(responses[1]);
+
+                        // Handle the responses here
+                        console.log('Response 1:', response1);
+                        console.log('Response 2:', response2);
+
+
+                        fillRadioDiv(response1, Zadanie_1_ID, "zadania");
+                        fillRadioDiv(response2, Zadanie_2_ID, "zadania");
+
+                        Promise.all([
+                            makeRequest('GET', '/pobierz_zadania_relacje', Relacja_Typ_ID)
+                        ])
+                            .then(function (responses2) {
+                                const response3 = JSON.parse(responses2[0]);
+                                console.log('Response 3:', response3);
+                                fillRadioDiv(response3, Relacja_Typ_ID, "zadania_relacja");
+
+                            })
+                            .catch(function (error) {
+                                console.error('Error occurred:', error);
+                            });
+                    })
+                    .catch(function (error) {
+                        console.error('Error occurred:', error);
+                    });
+
+                document.getElementById('myForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const formData = new FormData(this);
+                    // console.log(formData);
+                    // return;
+                    fetch('/dodaj_zadania_relacja', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw Error('Problem z połączeniem z serwerem');
+                            }
+                            return response;
+                        })
+                        .then(data => {
+                            // console.log('Server response:', data);
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+
+                const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        const id = button.getAttribute('data-hidden-id');
+                        // console.log(id);
+
+                        fetch(`/usun_zadania_relacja/${id}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw Error('Problem z połączeniem z serwerem');
+                                }
+                                return response;
+                            })
+                            .then(() => {
+                                window.location.reload();
+                            })
+                            .catch(error => {
+                                console.error('JavaScript. Error:', error);
+                            });
+                    });
+
+                });
+            }
+        )
+        ;
+
+    </script>
+
+</div>
+</body>
+</html>

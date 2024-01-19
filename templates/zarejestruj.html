@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+
+</head>
+<body style="background-color:black; background-image: url('imgs/kotek.png'); background-repeat: no-repeat; background-size: cover;">
+
+<h2 style="background-color: white; width: fit-content">Rejestracja</h2>
+{% include 'menu.html' %}
+<form id="registrationForm"  style="background-color: white; width: fit-content">
+
+    <label for="Email">E-mail:</label><br>
+    <input type="text" id="Email" name="Email" required><br>
+        <span id="emailValidationMessage" style="color: red;"></span>
+
+    <label for="Imie">Imię:</label><br>
+    <input type="text" id="Imie" name="Imie" required><br>
+
+    <label for="Nazwisko">Nazwisko:</label><br>
+    <input type="text" id="Nazwisko" name="Nazwisko" required><br>
+
+    <label for="Haslo">Haslo:</label><br>
+    <input type="password" id="Haslo" name="Haslo" required><br>
+
+    <label for="Telefon">Telefon:</label><br>
+    <input type="tel" id="Telefon" name="Telefon" required><br>
+        <span id="telefonValidationMessage" style="color: red;"></span>
+
+    <label for="Stanowisko_ID">Wybierz stanowisko</label><br>
+    <div id="Stanowisko_ID">
+        <!-- Radio buttons will be dynamically added here -->
+    </div>
+    <div>
+        <input type="submit" value="Zarejestruj">
+    </div>
+</form>
+<script>
+
+    // function registerUser(event) {
+    //     event.preventDefault();
+    //
+    //     const form = document.getElementById('registrationForm');
+    //     const formData = new FormData(form);
+    //     const requestData = {
+    //         email: formData.get('Email'),
+    //         imie: formData.get('Imie'),
+    //         nazwisko: formData.get('Nazwisko'),
+    //         haslo: formData.get('Haslo'),
+    //         stanowisko_ID: formData.get('Stanowisko_ID')
+    //     };
+    //     console.log(requestData);
+    //     fetch('/register', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify(requestData)
+    //     })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             console.log(data); // Handle success or error messages
+    //         })
+    //         .catch(error => {
+    //             console.error('Error:', error);
+    //         });
+    // }
+
+    function validateEmail() {
+        const emailValidationMessage = document.getElementById('emailValidationMessage');
+        const emailInput = document.getElementById('Email').value;
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (emailRegex.test(emailInput)) {
+            emailValidationMessage.textContent = '';
+            return 1;
+        } else {
+            emailValidationMessage.textContent = 'Wprowadź poprawny adres e-mail.';
+            emailValidationMessage.appendChild(document.createElement("br"));
+
+            return 0;
+        }
+    }
+
+    function validatePhoneNumber(numer_telefonu) {
+        const telefonValidationMessage = document.getElementById('telefonValidationMessage');
+        const telefonInput = document.getElementById('Telefon').value;
+        // Remove spaces
+        numer_telefonu = telefonInput.replace(/\s/g, '');
+
+        const regex = /^(\+?[0-9]+)?[0-9]+$/;
+        if (regex.test(numer_telefonu) && numer_telefonu !== null && numer_telefonu !== '' && numer_telefonu.length >= 7 && numer_telefonu.length <= 15) {
+            telefonValidationMessage.textContent = '';
+            return 1;
+        } else {
+            telefonValidationMessage.textContent = 'Wprowadź poprawny adres telefon np. +48 111 222 333 lub 111222333 lub 111 222 333. Długość od 7 do 15 znaków.';
+            telefonValidationMessage.appendChild(document.createElement("br"));
+
+            return 0;
+        }
+    }
+
+    document.getElementById('registrationForm').addEventListener('submit', function () {
+        event.preventDefault();
+        const formData = new FormData(this);
+        if (!validateEmail()) return;
+        if (!validatePhoneNumber()) return;
+        fetch('/zarejestruj', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw Error('Problem z połączeniem z serwerem');
+                }
+                return response;
+            })
+            .then(data => {
+                // console.log('Server response:', data);
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+
+
+    // Funkcja do wypisania listy stanowisk
+    function createStanowiskaRadio(stanowisko) {
+        const radioInput = document.createElement('input');
+        radioInput.type = 'radio';
+        radioInput.id = `stanowisko_${stanowisko[0]}`;
+        radioInput.name = 'Stanowisko_ID';
+        radioInput.value = stanowisko[0];
+        radioInput.required = true;
+
+        const label = document.createElement('label');
+        label.htmlFor = `stanowisko_${stanowisko[0]}`;
+        label.textContent = stanowisko[1];
+
+        const lineBreak = document.createElement('br');
+
+        Stanowisko_ID.appendChild(radioInput);
+        Stanowisko_ID.appendChild(label);
+        Stanowisko_ID.appendChild(lineBreak);
+
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        function fetchStanowiskaData() {
+            return new Promise(function (resolve, reject) {
+                const xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            const stanowiska = JSON.parse(xhr.response);
+                            resolve(stanowiska);
+                        } else {
+                            reject('Failed to fetch stanowiska: ' + xhr.status);
+                        }
+                    }
+                };
+
+                xhr.open('GET', '/pobierz_stanowiska', true);
+                xhr.send();
+            });
+        }
+
+        fetchStanowiskaData()
+            .then(function (stanowiska) {
+                stanowiska.forEach(function (stanowisko) {
+                    createStanowiskaRadio(stanowisko);
+                });
+            })
+            .catch(function (error) {
+                console.error(error);
+            });
+
+    });
+
+
+</script>
+</body>
+</html>

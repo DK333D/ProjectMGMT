@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista osób</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+
+</head>
+<body>
+<div>
+
+    {% include 'menu.html' %}
+    <h1>Lista osób</h1>
+    <table>
+        <tr>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th>E-mail</th>
+            <th>Telefon</th>
+            <th>Stanowisko</th>
+            <th>Czy administrator</th>
+        </tr>
+        {% for osoba in result %}
+        <tr>
+            <td>{{ osoba[1] }}</td>
+            <td>{{ osoba[2] }}</td>
+            <td>{{ osoba[3] }}</td>
+            <td>{{ osoba[4] }}</td>
+            <td>{{ osoba[5] }}</td>
+            <td>{{ osoba[6] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{osoba[0]}}"> Usuń</button>
+            </td>
+            {% if (osoba[6]==false or osoba[6]==None) and isAdmin==true %}
+            <td>
+                <button style="background-color: #95e39f" name="dodajJakoAdministrator" data-hidden-id="{{osoba[0]}}"> Dodaj jako administrator</button>
+            </td>
+            {% elif isAdmin==true %}
+            <td>
+                <button style="background-color: indianred" name="odbierzUprawnieniaAdministratora" data-hidden-id="{{osoba[0]}}"> Zabierz uprawnienia
+                    administratora
+                </button>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <!--    <h1>Dodaj osobę</h1>-->
+    <!--    <form id="myForm">-->
+    <!--        <label for="imie">Imię:</label><br>-->
+    <!--        <input type="text" id="imie" name="imie" required><br>-->
+
+    <!--        <label for="nazwisko">Nazwisko:</label><br>-->
+    <!--        <input type="text" id="nazwisko" name="nazwisko" required><br>-->
+
+    <!--        <label for="email">E-mail:</label><br>-->
+    <!--        <input type="email" id="email" name="email" required><br>-->
+
+    <!--        <span id="emailValidationMessage" style="color: red;"></span>-->
+    <!--        <label for="telefon">Telefon:</label><br>-->
+
+    <!--        <input type="tel" id="telefon" name="telefon" required><br>-->
+    <!--        <span id="telefonValidationMessage" style="color: red;"></span>-->
+    <!--        &lt;!&ndash;        <span id="emailValidationMessage" style="color: red;"></span><br>&ndash;&gt;-->
+
+    <!--        <label for="Stanowisko_ID">Wybierz stanowisko</label>-->
+    <!--        <div id="Stanowisko_ID">-->
+    <!--            &lt;!&ndash; Radio buttons will be dynamically added here &ndash;&gt;-->
+    <!--        </div>-->
+
+
+    <!--        <input type="submit" value="Dodaj osobę">-->
+    <!--    </form>-->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        //     const Stanowisko_ID = document.getElementById('Stanowisko_ID');
+        //
+        //     // Funkcja do wypisania listy stanowisk
+        //     function createStanowiskaRadio(stanowisko) {
+        //         const radioInput = document.createElement('input');
+        //         radioInput.type = 'radio';
+        //         radioInput.id = `stanowisko_${stanowisko[0]}`;
+        //         radioInput.name = 'Stanowisko_ID';
+        //         radioInput.value = stanowisko[0];
+        //         radioInput.required = true;
+        //
+        //         const label = document.createElement('label');
+        //         label.htmlFor = `stanowisko_${stanowisko[0]}`;
+        //         label.textContent = stanowisko[1];
+        //
+        //         const lineBreak = document.createElement('br');
+        //
+        //         Stanowisko_ID.appendChild(radioInput);
+        //         Stanowisko_ID.appendChild(label);
+        //         Stanowisko_ID.appendChild(lineBreak);
+        //
+        //     }
+        //
+        //     function fetchStanowiskaData() {
+        //         return new Promise(function (resolve, reject) {
+        //             const xhr = new XMLHttpRequest();
+        //             xhr.onreadystatechange = function () {
+        //                 if (xhr.readyState === XMLHttpRequest.DONE) {
+        //                     if (xhr.status === 200) {
+        //                         const stanowiska = JSON.parse(xhr.response);
+        //                         resolve(stanowiska);
+        //                     } else {
+        //                         reject(xhr.status);
+        //                     }
+        //                 }
+        //             };
+        //
+        //             xhr.open('GET', '/pobierz_stanowiska', true);
+        //             xhr.send();
+        //         });
+        //     }
+        //
+        //     fetchStanowiskaData()
+        //         .then(function (stanowiska) {
+        //             stanowiska.forEach(function (stanowisko) {
+        //                 createStanowiskaRadio(stanowisko);
+        //             });
+        //         })
+        //         .catch(function (error) {
+        //             console.error('Failed to fetch stanowiska:', error);
+        //         });
+        //
+        //
+        //     function validateEmail() {
+        //         const emailValidationMessage = document.getElementById('emailValidationMessage');
+        //         const emailInput = document.getElementById('email').value;
+        //
+        //         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        //
+        //         if (emailRegex.test(emailInput)) {
+        //             emailValidationMessage.textContent = '';
+        //             return 1;
+        //         } else {
+        //             emailValidationMessage.textContent = 'Wprowadź poprawny adres e-mail.';
+        //             emailValidationMessage.appendChild(document.createElement("br"));
+        //
+        //             return 0;
+        //         }
+        //     }
+        //
+        //     function validatePhoneNumber(numer_telefonu) {
+        //         const telefonValidationMessage = document.getElementById('telefonValidationMessage');
+        //         const telefonInput = document.getElementById('telefon').value;
+        //         // Remove spaces
+        //         numer_telefonu = telefonInput.replace(/\s/g, '');
+        //
+        //         const regex = /^(\+?[0-9]+)?[0-9]+$/;
+        //         if (regex.test(numer_telefonu) && numer_telefonu !== null && numer_telefonu !== '' && numer_telefonu.length >= 7 && numer_telefonu.length <= 15) {
+        //             telefonValidationMessage.textContent = '';
+        //             return 1;
+        //         } else {
+        //             telefonValidationMessage.textContent = 'Wprowadź poprawny adres telefon np. +48 111 222 333 lub 111222333 lub 111 222 333. Długość od 7 do 15 znaków.';
+        //             telefonValidationMessage.appendChild(document.createElement("br"));
+        //
+        //             return 0;
+        //         }
+        //     }
+
+
+        // document.getElementById('myForm').addEventListener('submit', function () {
+        //     event.preventDefault();
+        //     const formData = new FormData(this);
+        //     if (!validateEmail()) return;
+        //     if (!validatePhoneNumber()) return;
+        //     fetch('/dodaj_osoba', {
+        //         method: 'POST',
+        //         body: formData
+        //     })
+        //         .then(response => {
+        //             if (!response.ok) {
+        //                 throw Error('Problem z połączeniem z serwerem');
+        //             }
+        //             return response;
+        //         })
+        //         .then(data => {
+        //             // console.log('Server response:', data);
+        //             window.location.reload();
+        //         })
+        //         .catch(error => {
+        //             console.error('Error:', error);
+        //         });
+        // });
+
+        const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                var confirmation = confirm("Usunięcie osoby spowoduje, że zostanie usunięta z wszystkich projektów");
+                if (confirmation) {
+                    const id = button.getAttribute('data-hidden-id');
+                    fetch(`/usun_osoba/${id}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw Error('Problem z połączeniem z serwerem');
+                            }
+                            return response;
+                        })
+                        .then(() => {
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('JavaScript. Error:', error);
+                        });
+                }
+            });
+        });
+
+
+        const dodajAdminList = document.querySelectorAll('button[name="dodajJakoAdministrator"]');
+
+        dodajAdminList.forEach(button => {
+            button.addEventListener('click', function () {
+                var confirmation = confirm("Dodaj temu użytkownikowi uprawnienia administratora");
+                if (confirmation) {
+                    const id = button.getAttribute('data-hidden-id');
+                    fetch(`/dodaj_admin/${id}`, {
+                        method: 'PATCH'
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw Error('Problem z połączeniem z serwerem');
+                            }
+                            return response;
+                        })
+                        .then(() => {
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('JavaScript. Error:', error);
+                        });
+                }
+            });
+        });
+
+
+        const usunAdminList = document.querySelectorAll('button[name="odbierzUprawnieniaAdministratora"]');
+
+        usunAdminList.forEach(button => {
+            button.addEventListener('click', function () {
+                var confirmation = confirm("Odbierz temu użytkownikowi uprawnienia administratora");
+                if (confirmation) {
+                    const id = button.getAttribute('data-hidden-id');
+                    fetch(`/usun_admin/${id}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw Error('Problem z połączeniem z serwerem');
+                            }
+                            return response;
+                        })
+                        .then(() => {
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('JavaScript. Error:', error);
+                        });
+                }
+            });
+        });
+
+        })
+        ;
+
+    </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista relacji między zadaniami</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+<div>
+    {% include 'menu.html' %}
+    <h1>Lista relacji między zadaniami</h1>
+    <table>
+        <tr>
+            <th>Projekt</th>
+            <th>Osoba</th>
+            <th>Rola</th>
+        </tr>
+        {% for relacja in result %}
+        <tr>
+            <td>{{ relacja[1] }}</td>
+            <td>{{ relacja[2] }}</td>
+            <td>{{ relacja[3] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{relacja[0]}}"> Usuń</button>
+            </td>
+
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <h1>Dodaj relacja</h1>
+    <form id="myForm">
+        <div style="display: flex;">
+            <label for="Projekt_ID">Wybierz Projekt</label>
+            <div id="Projekt_ID">
+            </div>
+            <label for="Osoba_ID">Wybierz Osobę</label>
+            <div id="Osoba_ID">
+            </div>
+            <label for="Rola_ID">Wybierz Rolę</label>
+            <div id="Rola_ID">
+            </div>
+        </div>
+        <input type="submit" value="Dodaj relację">
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+                const Projekt_ID = document.getElementById('Projekt_ID');
+                const Osoba_ID = document.getElementById('Osoba_ID');
+                const Rola_ID = document.getElementById('Rola_ID');
+
+                function createRadio(data, div, id_text) {
+                    const radioInput = document.createElement('input');
+                    radioInput.type = 'radio';
+                    radioInput.id = id_text + `_${data[0]}`;
+                    radioInput.name = div.id;
+                    radioInput.value = data[0];
+                    radioInput.required = true;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = id_text + `_${data[0]}`;
+                    label.textContent = data[1];
+
+                    const lineBreak = document.createElement('br');
+
+                    div.appendChild(radioInput);
+                    div.appendChild(label);
+                    div.appendChild(lineBreak);
+                }
+
+
+                function fillRadioDiv(responseText, div, id_text) {
+                    responseText.forEach(function (zadanie, id_text) {
+                        createRadio(zadanie, div, id_text);
+                    });
+                }
+
+                function makeRequest(method, url) {
+                    return new Promise(function (resolve, reject) {
+                        const xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState === XMLHttpRequest.DONE) {
+                                if (xhr.status === 200) {
+                                    resolve(xhr.responseText);
+                                } else {
+                                    reject(xhr.status);
+                                }
+                            }
+                        };
+                        xhr.open(method, url, true);
+                        xhr.send();
+                    });
+                }
+
+                Promise.all([
+                    makeRequest('GET', '/pobierz_projekty'),
+                ])
+                    .then(function (responses) {
+                        const response1 = JSON.parse(responses[0]);
+                        console.log('Response 1:', response1);
+                        fillRadioDiv(response1, Projekt_ID);
+
+                        return Promise.all([
+                            makeRequest('GET', '/pobierz_osoby'),
+                        ]);
+                    })
+                    .then(function (responses) {
+                        const response2 = JSON.parse(responses[0]);
+                        console.log('Response 2:', response2);
+                        fillRadioDiv(response2, Osoba_ID);
+
+                        return Promise.all([
+                            makeRequest('GET', '/pobierz_role'),
+                        ]);
+                    })
+                    .then(function (responses) {
+                        const response3 = JSON.parse(responses[0]);
+                        console.log('Response 3:', response3);
+                        fillRadioDiv(response3, Rola_ID);
+                    })
+                    .catch(function (error) {
+                        console.error('Error occurred:', error);
+                    });
+
+
+                document.getElementById('myForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const formData = new FormData(this);
+                    fetch('/dodaj_projekt_osoba_rola', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw Error('Problem z połączeniem z serwerem');
+                            }
+                            return response;
+                        })
+                        .then(data => {
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+
+                const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        const id = button.getAttribute('data-hidden-id');
+                        fetch(`/usun_projekt_osoba_rola/${id}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw Error('Problem z połączeniem z serwerem');
+                                }
+                                return response;
+                            })
+                            .then(() => {
+                                window.location.reload();
+                            })
+                            .catch(error => {
+                                console.error('JavaScript. Error:', error);
+                            });
+                    });
+                });
+            }
+        )
+        ;
+
+    </script>
+
+</div>
+</body>
+</html>

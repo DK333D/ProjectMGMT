@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista osób</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+
+</head>
+<body>
+<div>
+
+    {% include 'menu.html' %}
+    <h1>Lista osób</h1>
+    <table>
+        <tr>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th>E-mail</th>
+            <th>Telefon</th>
+            <th>Stanowisko</th>
+            <th>Czy administrator</th>
+        </tr>
+        {% for osoba in result %}
+        <tr>
+            <td>{{ osoba[1] }}</td>
+            <td>{{ osoba[2] }}</td>
+            <td>{{ osoba[3] }}</td>
+            <td>{{ osoba[4] }}</td>
+            <td>{{ osoba[5] }}</td>
+            <td>{{ osoba[6] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{osoba[0]}}"> Usuń</button>
+            </td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <h1>Dodaj osobę</h1>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+
+            const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    var confirmation = confirm("Usunięcie osoby spowoduje, że zostanie usunięta z wszystkich projektów");
+                    if (confirmation) {
+                        const id = button.getAttribute('data-hidden-id');
+                        fetch(`/usun_osoba/${id}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw Error('Problem z połączeniem z serwerem');
+                                }
+                                return response;
+                            })
+                            .then(() => {
+                                window.location.reload();
+                            })
+                            .catch(error => {
+                                console.error('JavaScript. Error:', error);
+                            });
+                    }
+                });
+            });
+
+        });
+
+    </script>
+</div>
+</body>
+</html>

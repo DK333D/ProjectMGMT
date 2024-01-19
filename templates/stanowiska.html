@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista stanowisk</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+<div>
+
+    {% include 'menu.html' %}
+    <h1>Lista stanowisk</h1>
+    <table>
+        <tr>
+            <th>Nazwa</th>
+            <th>Opis</th>
+        </tr>
+        {% for stanowisko in result %}
+        <tr>
+            <td>{{ stanowisko[1] }}</td>
+            <td>{{ stanowisko[2] }}</td>
+            <td>
+                <button name="usun" data-hidden-id="{{stanowisko[0]}}"> Usuń</button>
+            </td>
+            <!--            <td>-->
+            <!--                 Button for deleting record -->
+            <!--                <form action="/dashboard" method="POST">-->
+            <!--                                        <input type="hidden" name="stanowisko_id" value="{{ stanowisko[0] }}">-->
+            <!--                    <input type="hidden" name="nazwa" value="{{ stanowisko[1] }}">-->
+            <!--                                        <input type="submit" value="Dashboard">-->
+            <!--                </form>-->
+            <!--            </td>-->
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <h1>Dodaj stanowisko</h1>
+    <form id="myForm">
+        <label for="Nazwa">Nazwa stanowiska:</label><br>
+        <input type="text" id="Nazwa" name="Nazwa" required><br>
+
+        <label for="Opis">Opis stanowiska:</label><br>
+        <textarea id="Opis" name="Opis"></textarea><br>
+
+        <input type="submit" value="Submit">
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('myForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                fetch('/dodaj_stanowisko', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw Error('Problem z połączeniem z serwerem');
+                        }
+                        return response;
+                    })
+                    .then(data => {
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+            const deleteButtons = document.querySelectorAll('button[name="usun"]');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                     var confirmation = confirm("Usunięcie stanowiska spowoduje, że wszystkim osobom na danym stanowisku zostanie przypisane stanowisko 'Brak'");
+                    if (confirmation) {
+                        const id = button.getAttribute('data-hidden-id');
+                    // console.log(`Deleted record with ID ${id}`);
+                    // return;
+                    fetch(`/usun_stanowisko/${id}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw Error('Problem z połączeniem z serwerem');
+                            }
+                            return response;
+                        })
+                        .then(() => {
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('JavaScript. Error:', error);
+                        });
+                    }
+                });
+            });
+        });
+
+    </script>
+</div>
+</body>
+</html>

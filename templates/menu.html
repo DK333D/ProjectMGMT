@@ -1,0 +1,59 @@
+{% if session_data %}
+<h1 style="background-color: white; width: fit-content">{{session_data}}</h1>
+<nav id="menu_for_logged_in">
+    <ul>
+        <li><a href="/projekty">Projekty</a></li>
+        <li><a href="/moje_projekty">Moje projekty</a></li>
+        <li><a href="/tablice">Tablice</a></li>
+        <li><a href="/zadania">Zadania</a></li>
+        <li><a href="/stanowiska">Stanowiska</a></li>
+        <li><a href="/osoby">Osoby</a></li>
+        <li><a href="/role">Role</a></li>
+        <li><a href="/projekt_osoba_role">Projekt_osoba_role</a></li>
+        <li><a href="/zadania_relacja_typy">Zadania_relacja_typy</a></li>
+        <li><a href="/zadania_relacje">Zadania_relacje</a></li>
+        <li><a href="/zaloguj">Logowanie</a></li>
+        <li><a href="/zarejestruj">Rejestracja</a></li>
+    </ul>
+    <div id="logoutDiv" style="">
+        <button id="logoutButton">Wyloguj</button>
+    </div>
+
+</nav>
+{% else %}
+<nav id="menu_for_not_logged_in">
+    <ul>
+        <li><a href="/zaloguj">Logowanie</a></li>
+        <li><a href="/zarejestruj">Rejestracja</a></li>
+    </ul>
+</nav>
+
+{% endif %}
+
+<script>
+    // Function to handle logout via JavaScript
+    async function logout() {
+        try {
+            const response = await fetch('/wyloguj');
+            if (response.ok) {
+                alert('Logged out successfully');
+                document.getElementById('logoutDiv').style.display = 'none';
+                window.location.href = "/";
+            } else {
+                throw new Error('Logout failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Logout failed');
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", (event) => {
+        let logoutBtn=document.getElementById('logoutButton');
+        if(logoutBtn!=null) {
+            logoutBtn.addEventListener('click', logout);
+        }
+    });
+
+
+</script>
